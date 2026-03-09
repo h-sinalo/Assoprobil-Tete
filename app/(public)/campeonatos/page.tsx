@@ -43,6 +43,7 @@ export default async function CampeonatosPage() {
                 title={champ.title}
                 description={champ.description}
                 date={champ.date}
+                image={champ.image_url}
                 href={`/campeonatos/${champ.slug}`}
                 location={champ.location}
                 status={champ.status}

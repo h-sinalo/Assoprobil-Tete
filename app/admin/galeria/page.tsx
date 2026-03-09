@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from "react"
 import { Plus, Trash2, ImageIcon } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { GalleryItem } from "@/lib/supabase"
+import { ImageUpload } from "@/components/admin/image-upload"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -127,8 +129,19 @@ export default function AdminGaleriaPage() {
               key={item.id}
               className="group relative overflow-hidden rounded-lg border border-border/50 bg-card"
             >
-              <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/10">
-                <ImageIcon className="size-10 text-muted-foreground/40" />
+              <div className="relative aspect-square overflow-hidden bg-muted">
+                {item.image_url ? (
+                  <Image
+                    src={item.image_url}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/10">
+                    <ImageIcon className="size-10 text-muted-foreground/40" />
+                  </div>
+                )}
               </div>
               <div className="p-3">
                 <p className="text-sm font-medium text-foreground line-clamp-1">{item.title}</p>
@@ -190,8 +203,12 @@ export default function AdminGaleriaPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <label className="text-sm font-medium">URL da imagem</label>
-              <Input value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} placeholder="https://…" />
+              <label className="text-sm font-medium">Ficheiro *</label>
+              <ImageUpload
+                value={form.image_url}
+                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
+                folder="gallery"
+              />
             </div>
           </div>
           <DialogFooter>

@@ -3,8 +3,9 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { PageHeader } from "@/components/shared/page-header"
 import { supabase } from "@/lib/supabase"
-import { Calendar, Tag, ArrowLeft } from "lucide-react"
+import { Calendar, Tag, ArrowLeft, Image as ImageIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 export const revalidate = 60
 
@@ -54,7 +55,7 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
             <ArrowLeft className="size-4" /> Voltar às Notícias
           </Link>
 
-          <div className="flex flex-wrap gap-3 mb-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap gap-3 mb-8 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="size-4 text-primary" />
               {article.date}
@@ -65,14 +66,34 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
             </Badge>
           </div>
 
+          {article.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={article.image_url}
+                alt={article.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+
 
           {article.images && article.images.length > 0 && (
-            <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {article.images.map((img: string, idx: number) => (
-                <div key={idx} className="overflow-hidden rounded-lg border border-border/50">
-                  <img src={img} alt={`${article.title} - ${idx + 1}`} className="aspect-video w-full object-cover" />
-                </div>
-              ))}
+            <div className="mb-12">
+              <h3 className="text-lg font-semibold mb-4 font-serif text-foreground">Galeria de Imagens</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {article.images.map((img: string, idx: number) => (
+                  <div key={idx} className="relative aspect-video overflow-hidden rounded-lg border border-border/50 bg-muted">
+                    <Image
+                      src={img}
+                      alt={`${article.title} - ${idx + 1}`}
+                      fill
+                      className="object-cover transition-transform hover:scale-105"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

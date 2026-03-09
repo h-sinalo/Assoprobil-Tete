@@ -127,6 +127,7 @@ export default async function HomePage() {
                   title={champ.title}
                   description={champ.description}
                   date={champ.date}
+                  image={champ.image_url}
                   href={`/campeonatos/${champ.slug}`}
                   location={champ.location}
                   status={champ.status}
@@ -162,6 +163,7 @@ export default async function HomePage() {
                   title={article.title}
                   description={article.description}
                   date={article.date}
+                  image={article.image_url}
                   href={`/noticias/${article.slug}`}
                   category={article.category}
                 />
@@ -203,8 +205,17 @@ export default async function HomePage() {
                     href={`/responsabilidade-social/${post.slug}`}
                     className="group flex gap-4 rounded-lg border border-border/50 bg-card p-5 transition-all hover:border-primary/30 hover:shadow-md"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Trophy className="size-5" />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary relative">
+                      {post.image_url ? (
+                        <Image
+                          src={post.image_url}
+                          alt={post.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <Trophy className="size-6" />
+                      )}
                     </div>
                     <div>
                       <h3 className="font-serif text-sm font-semibold text-foreground transition-colors group-hover:text-primary">

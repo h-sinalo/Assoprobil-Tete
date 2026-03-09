@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Heart } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { SocialResponsibility } from "@/lib/supabase"
+import { ImageUpload } from "@/components/admin/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -35,6 +36,7 @@ type FormData = {
   date: string
   category: string
   published: boolean
+  image_url: string
   images: string[]
 }
 
@@ -46,6 +48,7 @@ const emptyForm: FormData = {
   date: "",
   category: "",
   published: true,
+  image_url: "",
   images: [],
 }
 
@@ -78,6 +81,7 @@ export default function AdminResponsabilidadeSocialPage() {
       title: item.title, slug: item.slug, description: item.description,
       content: item.content ?? "", date: item.date, category: item.category,
       published: item.published,
+      image_url: item.image_url ?? "",
       images: item.images ?? [],
     })
     setDialogOpen(true)
@@ -191,12 +195,20 @@ export default function AdminResponsabilidadeSocialPage() {
               <Textarea value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} rows={5} />
             </div>
             <div className="grid gap-2">
-              <label className="text-sm font-medium">Imagens (URLs separadas por vírgula)</label>
-              <Textarea
-                placeholder="https://exemplo.com/imagem1.jpg, https://exemplo.com/imagem2.jpg"
-                value={form.images?.join(", ") || ""}
-                onChange={(e) => setForm((f) => ({ ...f, images: e.target.value.split(",").map(i => i.trim()).filter(Boolean) }))}
-                rows={2}
+              <label className="text-sm font-medium">Imagem de Destaque</label>
+              <ImageUpload
+                value={form.image_url}
+                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
+                folder="social/thumbnails"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Galeria de Imagens</label>
+              <ImageUpload
+                value={form.images}
+                onChange={(urls) => setForm((f) => ({ ...f, images: urls as string[] }))}
+                multiple
+                folder="social/gallery"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">

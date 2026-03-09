@@ -34,6 +34,7 @@ export default async function ResponsabilidadeSocialPage() {
                 title={post.title}
                 description={post.description}
                 date={post.date}
+                image={post.image_url}
                 href={`/responsabilidade-social/${post.slug}`}
                 category={post.category}
               />

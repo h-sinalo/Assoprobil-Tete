@@ -34,6 +34,7 @@ export default async function NoticiasPage() {
                 title={article.title}
                 description={article.description}
                 date={article.date}
+                image={article.image_url}
                 href={`/noticias/${article.slug}`}
                 category={article.category}
               />

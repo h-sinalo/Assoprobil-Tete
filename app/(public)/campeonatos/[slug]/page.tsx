@@ -10,8 +10,10 @@ import {
   Trophy,
   ArrowLeft,
   CheckCircle,
+  Image as ImageIcon,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 import {
   Table,
   TableBody,
@@ -76,12 +78,24 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
             <ArrowLeft className="size-4" /> Voltar aos Campeonatos
           </Link>
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-8">
             <Badge className={statusConfig[status].className}>
               {statusConfig[status].label}
             </Badge>
             <Badge variant="outline">{champ.year}</Badge>
           </div>
+
+          {champ.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={champ.image_url}
+                alt={champ.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
 
           {/* Info Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
@@ -167,12 +181,23 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
           )}
           {/* Additional Images */}
           {champ.images && champ.images.length > 0 && (
-            <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {champ.images.map((img: string, idx: number) => (
-                <div key={idx} className="overflow-hidden rounded-lg border border-border/50">
-                  <img src={img} alt={`${champ.title} - ${idx + 1}`} className="aspect-video w-full object-cover" />
-                </div>
-              ))}
+            <div className="mt-12">
+              <h2 className="font-serif text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <ImageIcon className="size-5 text-primary" />
+                Galeria do Evento
+              </h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {champ.images.map((img: string, idx: number) => (
+                  <div key={idx} className="relative aspect-video overflow-hidden rounded-lg border border-border/50 bg-muted">
+                    <Image
+                      src={img}
+                      alt={`${champ.title} - ${idx + 1}`}
+                      fill
+                      className="object-cover transition-transform hover:scale-105"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
