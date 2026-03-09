@@ -23,7 +23,7 @@ const navLinks = [
   { href: "/noticias", label: "Noticias" },
   { href: "/galeria", label: "Galeria" },
   { href: "/contactos", label: "Contactos" },
-  { href: "/admin", label: "Entrar" },
+  { href: "/login", label: "Entrar" },
 ]
 
 export function Header() {
