@@ -1,0 +1,92 @@
+import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import Link from "next/link"
+import { PageHeader } from "@/components/shared/page-header"
+import { supabase } from "@/lib/supabase"
+import { Calendar, Tag, ArrowLeft } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+
+export const revalidate = 60
+
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const { data } = await supabase
+    .from("news")
+    .select("title, description")
+    .eq("slug", slug)
+    .single()
+  if (!data) return { title: "Notícia | ASSOPROBIL Tete" }
+  return { title: data.title, description: data.description }
+}
+
+export default async function NoticiaDetailPage({ params }: PageProps) {
+  const { slug } = await params
+  const { data: article } = await supabase
+    .from("news")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single()
+
+  if (!article) notFound()
+
+  return (
+    <>
+      <PageHeader
+        title={article.title}
+        description={article.description}
+        breadcrumbs={[
+          { label: "Notícias", href: "/noticias" },
+          { label: article.title },
+        ]}
+      />
+
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-3xl px-4 lg:px-8">
+          <Link
+            href="/noticias"
+            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
+          >
+            <ArrowLeft className="size-4" /> Voltar às Notícias
+          </Link>
+
+          <div className="flex flex-wrap gap-3 mb-6 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="size-4 text-primary" />
+              {article.date}
+            </span>
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <Tag className="size-3" />
+              {article.category}
+            </Badge>
+          </div>
+
+
+          {article.images && article.images.length > 0 && (
+            <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {article.images.map((img: string, idx: number) => (
+                <div key={idx} className="overflow-hidden rounded-lg border border-border/50">
+                  <img src={img} alt={`${article.title} - ${idx + 1}`} className="aspect-video w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground">
+            {(article.content || article.description)
+              .split("\n")
+              .map((paragraph: string, i: number) => (
+                <p key={i} className="mb-4">
+                  {paragraph}
+                </p>
+              ))}
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
