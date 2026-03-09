@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Lock, Mail } from "lucide-react"
 import Image from "next/image"
 
+import { login as loginAction } from "./actions"
+
 export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -22,17 +24,17 @@ export default function LoginPage() {
         setLoading(true)
         setError(null)
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        const formData = new FormData()
+        formData.append("email", email)
+        formData.append("password", password)
 
-        if (error) {
-            setError(error.message)
+        const result = await loginAction(formData)
+
+        if (result?.error) {
+            setError(result.error)
             setLoading(false)
-        } else {
-            router.push("/admin")
         }
+        // Redirect is handled by the action
     }
 
     return (
