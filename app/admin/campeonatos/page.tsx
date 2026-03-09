@@ -8,6 +8,7 @@ import { ImageUpload } from "@/components/admin/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -121,19 +122,28 @@ export default function AdminCampeonatosPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const payload = {
-      ...form,
-      participants: parseInt(form.participants),
-      year: parseInt(form.year),
+    try {
+      const payload = {
+        ...form,
+        participants: parseInt(form.participants) || 0,
+        year: parseInt(form.year) || new Date().getFullYear(),
+      }
+
+      const { error } = editingItem
+        ? await supabase.from("championships").update(payload).eq("id", editingItem.id)
+        : await supabase.from("championships").insert(payload)
+
+      if (error) throw error
+
+      toast.success(editingItem ? "Campeonato actualizado!" : "Campeonato criado!")
+      setDialogOpen(false)
+      fetchChampionships()
+    } catch (error: any) {
+      console.error("Error saving championship:", error)
+      toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
+    } finally {
+      setSaving(false)
     }
-    if (editingItem) {
-      await supabase.from("championships").update(payload).eq("id", editingItem.id)
-    } else {
-      await supabase.from("championships").insert(payload)
-    }
-    setSaving(false)
-    setDialogOpen(false)
-    fetchChampionships()
   }
 
   const handleDelete = async () => {

@@ -8,6 +8,7 @@ import { ImageUpload } from "@/components/admin/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -98,14 +99,22 @@ export default function AdminNoticiasPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    if (editingItem) {
-      await supabase.from("news").update(form).eq("id", editingItem.id)
-    } else {
-      await supabase.from("news").insert(form)
+    try {
+      const { error } = editingItem
+        ? await supabase.from("news").update(form).eq("id", editingItem.id)
+        : await supabase.from("news").insert(form)
+
+      if (error) throw error
+
+      toast.success(editingItem ? "Notícia actualizada!" : "Notícia criada!")
+      setDialogOpen(false)
+      fetchNews()
+    } catch (error: any) {
+      console.error("Error saving news:", error)
+      toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
-    setDialogOpen(false)
-    fetchNews()
   }
 
   const handleDelete = async () => {

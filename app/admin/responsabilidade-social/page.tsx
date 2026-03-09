@@ -8,6 +8,7 @@ import { ImageUpload } from "@/components/admin/image-upload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -89,14 +90,22 @@ export default function AdminResponsabilidadeSocialPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    if (editingItem) {
-      await supabase.from("social_responsibility").update(form).eq("id", editingItem.id)
-    } else {
-      await supabase.from("social_responsibility").insert(form)
+    try {
+      const { error } = editingItem
+        ? await supabase.from("social_responsibility").update(form).eq("id", editingItem.id)
+        : await supabase.from("social_responsibility").insert(form)
+
+      if (error) throw error
+
+      toast.success(editingItem ? "Iniciativa actualizada!" : "Iniciativa criada!")
+      setDialogOpen(false)
+      fetchPosts()
+    } catch (error: any) {
+      console.error("Error saving social responsibility:", error)
+      toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
-    setDialogOpen(false)
-    fetchPosts()
   }
 
   const handleDelete = async () => {

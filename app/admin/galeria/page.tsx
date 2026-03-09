@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -80,10 +81,19 @@ export default function AdminGaleriaPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    await supabase.from("gallery").insert(form)
-    setSaving(false)
-    setDialogOpen(false)
-    fetchItems()
+    try {
+      const { error } = await supabase.from("gallery").insert(form)
+      if (error) throw error
+
+      toast.success("Item adicionado à galeria!")
+      setDialogOpen(false)
+      fetchItems()
+    } catch (error: any) {
+      console.error("Error saving gallery item:", error)
+      toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDelete = async () => {
