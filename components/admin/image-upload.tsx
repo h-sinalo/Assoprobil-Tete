@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import Image from "next/image"
+import imageCompression from "browser-image-compression"
 
 interface ImageUploadProps {
     value?: string | string[]
@@ -38,9 +39,29 @@ export function ImageUpload({
 
         const newUrls: string[] = [...urls]
 
+        const options = {
+            maxSizeMB: 0.8,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+        }
+
         try {
             for (let i = 0; i < files.length; i++) {
-                const file = files[i]
+                let file = files[i]
+
+                // Compress image if it's an image file
+                if (file.type.startsWith("image/")) {
+                    try {
+                        const compressedFile = await imageCompression(file, options)
+                        // Preserve original name but with compressed blob
+                        file = new File([compressedFile], file.name, {
+                            type: compressedFile.type,
+                        })
+                    } catch (compressionError) {
+                        console.error("Compression failed, uploading original:", compressionError)
+                    }
+                }
+
                 const fileExt = file.name.split(".").pop()
                 const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
                 const filePath = folder ? `${folder}/${fileName}` : fileName
@@ -60,17 +81,17 @@ export function ImageUpload({
                 if (multiple) {
                     newUrls.push(publicUrl)
                 } else {
-                    // If not multiple, we only keep the last one uploaded
                     newUrls[0] = publicUrl
-                    break // Exit loop for single upload
+                    break
                 }
 
                 setProgress(Math.round(((i + 1) / files.length) * 100))
             }
 
             onChange(multiple ? newUrls : newUrls[0])
-            toast.success("Imagem carregada com sucesso")
+            toast.success("Imagem carregada e optimizada com sucesso")
         } catch (error: any) {
+            console.error("Upload error:", error)
             toast.error(`Erro no carregamento: ${error.message}`)
         } finally {
             setUploading(false)

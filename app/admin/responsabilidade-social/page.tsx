@@ -19,6 +19,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
@@ -334,9 +341,20 @@ export default function AdminResponsabilidadeSocialPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Educação, Saúde..." {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione uma categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Educação">Educação</SelectItem>
+                          <SelectItem value="Saúde">Saúde</SelectItem>
+                          <SelectItem value="Infraestrutura">Infraestrutura</SelectItem>
+                          <SelectItem value="Apoio Social">Apoio Social</SelectItem>
+                          <SelectItem value="Outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

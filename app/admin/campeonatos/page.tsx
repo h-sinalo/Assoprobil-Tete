@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { Plus, Pencil, Trash2, Trophy } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -110,7 +111,16 @@ export default function AdminCampeonatosPage() {
     setLoading(false)
   }, [])
 
+  const searchParams = useSearchParams()
+  const openParam = searchParams.get("open")
+
   useEffect(() => { fetchChampionships() }, [fetchChampionships])
+
+  useEffect(() => {
+    if (openParam === "true") {
+      openCreate()
+    }
+  }, [openParam])
 
   const slugify = (s: string) =>
     s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")

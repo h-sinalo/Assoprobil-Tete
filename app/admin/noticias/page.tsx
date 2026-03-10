@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { Plus, Pencil, Trash2, Newspaper } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -19,6 +20,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
@@ -90,7 +98,16 @@ export default function AdminNoticiasPage() {
     setLoading(false)
   }, [])
 
+  const searchParams = useSearchParams()
+  const openParam = searchParams.get("open")
+
   useEffect(() => { fetchNews() }, [fetchNews])
+
+  useEffect(() => {
+    if (openParam === "true") {
+      openCreate()
+    }
+  }, [openParam])
 
   const slugify = (s: string) =>
     s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
@@ -334,9 +351,20 @@ export default function AdminNoticiasPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Institucional, Desporto..." {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione uma categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Institucional">Institucional</SelectItem>
+                          <SelectItem value="Desporto">Desporto</SelectItem>
+                          <SelectItem value="Sindicato">Sindicato</SelectItem>
+                          <SelectItem value="Comunidade">Comunidade</SelectItem>
+                          <SelectItem value="Outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

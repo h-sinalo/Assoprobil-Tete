@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
-import { Trophy, Newspaper, Heart, ImageIcon, Users, TrendingUp } from "lucide-react"
+import { Trophy, Newspaper, Heart, ImageIcon, Users, TrendingUp, Plus } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { createClient } from "@/lib/supabase-server"
 
 export const metadata: Metadata = {
@@ -50,9 +52,23 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Visão geral do sistema ASSOPROBIL Tete</p>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div>
+          <h1 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Visão geral do sistema ASSOPROBIL Tete</p>
+        </div>
+        <div className="flex items-center justify-end gap-3">
+          <Link href="/admin/noticias?open=true">
+            <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
+              <Plus className="size-4" /> Nova Notícia
+            </Button>
+          </Link>
+          <Link href="/admin/campeonatos?open=true">
+            <Button className="gap-2">
+              <Plus className="size-4" /> Novo Campeonato
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
