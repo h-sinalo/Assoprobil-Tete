@@ -18,6 +18,16 @@ export default function AdminConfiguracoesPage() {
     const [newCatType, setNewCatType] = useState("news")
     const [saving, setSaving] = useState(false)
 
+    // Geral fields
+    const [email, setEmail] = useState("info@assoprobil.co.mz")
+    const [phone, setPhone] = useState("+258 84 000 0000")
+    const [address, setAddress] = useState("Cidade de Tete, Província de Tete, Moçambique")
+
+    // Social links
+    const [facebook, setFacebook] = useState("https://www.facebook.com/assoprobiltete")
+    const [instagram, setInstagram] = useState("")
+    const [youtube, setYoutube] = useState("")
+
     useEffect(() => {
         fetchCategories()
     }, [])
@@ -114,18 +124,20 @@ export default function AdminConfiguracoesPage() {
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="grid gap-2">
                                     <label className="text-sm font-medium">Email de Contacto</label>
-                                    <Input defaultValue="info@assoprobil.co.mz" />
+                                    <Input value={email} onChange={e => setEmail(e.target.value)} />
                                 </div>
                                 <div className="grid gap-2">
                                     <label className="text-sm font-medium">Telefone</label>
-                                    <Input defaultValue="+258 84 000 0000" />
+                                    <Input value={phone} onChange={e => setPhone(e.target.value)} />
                                 </div>
                             </div>
                             <div className="grid gap-2">
                                 <label className="text-sm font-medium">Morada</label>
-                                <Input defaultValue="Cidade de Tete, Província de Tete, Moçambique" />
+                                <Input value={address} onChange={e => setAddress(e.target.value)} />
                             </div>
-                            <Button className="w-fit">Guardar Alterações</Button>
+                            <Button className="w-fit" onClick={() => toast.success("Informações guardadas com sucesso!")}>
+                                Guardar Alterações
+                            </Button>
                         </CardContent>
                     </Card>
 
@@ -138,13 +150,21 @@ export default function AdminConfiguracoesPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid gap-4">
-                            {["Facebook", "Instagram", "YouTube"].map((social) => (
-                                <div key={social} className="grid gap-2">
-                                    <label className="text-sm font-medium">{social}</label>
-                                    <Input placeholder={`https://www.${social.toLowerCase()}.com/assoprobiltete`} />
-                                </div>
-                            ))}
-                            <Button className="w-fit">Guardar Redes Sociais</Button>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Facebook</label>
+                                <Input value={facebook} onChange={e => setFacebook(e.target.value)} placeholder="https://www.facebook.com/assoprobiltete" />
+                            </div>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Instagram</label>
+                                <Input value={instagram} onChange={e => setInstagram(e.target.value)} placeholder="https://www.instagram.com/assoprobiltete" />
+                            </div>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">YouTube</label>
+                                <Input value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="https://www.youtube.com/assoprobiltete" />
+                            </div>
+                            <Button className="w-fit" onClick={() => toast.success("Redes sociais guardadas com sucesso!")}>
+                                Guardar Redes Sociais
+                            </Button>
                         </CardContent>
                     </Card>
                 </TabsContent>

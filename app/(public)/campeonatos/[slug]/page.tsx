@@ -9,9 +9,10 @@ import {
   Users,
   Trophy,
   ArrowLeft,
-  CheckCircle,
   Image as ImageIcon,
 } from "lucide-react"
+import { formatDate } from "@/lib/format-date"
+
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import {
@@ -62,7 +63,7 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
     <>
       <PageHeader
         title={champ.title}
-        description={`${champ.date}${champ.end_date ? ` — ${champ.end_date}` : ""} · ${champ.location}`}
+        description={`${formatDate(champ.date)}${champ.end_date ? ` — ${formatDate(champ.end_date)}` : ""} · ${champ.location}`}
         breadcrumbs={[
           { label: "Campeonatos", href: "/campeonatos" },
           { label: champ.title },
@@ -86,7 +87,7 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
           {/* Info Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
             {[
-              { icon: Calendar, label: "Data", value: champ.date },
+              { icon: Calendar, label: "Data", value: formatDate(champ.date) },
               { icon: MapPin, label: "Local", value: champ.location },
               { icon: Users, label: "Participantes", value: `${champ.participants} atletas` },
               {
@@ -116,15 +117,6 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Results */}
-          {champ.results && champ.results.length > 0 && (
-            <div className="mt-10">
-              <h2 className="font-serif text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <CheckCircle className="size-5 text-primary" />
-                Resultados Finais
-              </h2>
-            </div>
-          )}
 
           {/* Additional Images */}
           {champ.images && champ.images.length > 0 && (

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { PageHeader } from "@/components/shared/page-header"
 import { supabase } from "@/lib/supabase"
 import { Calendar, Tag, ArrowLeft, Image as ImageIcon } from "lucide-react"
+import { formatDate } from "@/lib/format-date"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 
@@ -97,7 +98,7 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
               <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="size-4 text-primary" />
-                  {article.date}
+                  {formatDate(article.date)}
                 </span>
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Tag className="size-3" />
