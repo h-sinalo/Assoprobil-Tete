@@ -56,9 +56,9 @@ const championshipSchema = z.object({
   date: z.string().min(1, "A data de início é obrigatória"),
   end_date: z.string().optional(),
   location: z.string().min(1, "O local é obrigatório"),
-  participants: z.string().transform((v) => parseInt(v) || 0),
+  participants: z.union([z.string(), z.number()]).transform((v) => typeof v === "string" ? parseInt(v) || 0 : v),
   status: z.enum(["upcoming", "ongoing", "completed"]),
-  year: z.string().transform((v) => parseInt(v) || new Date().getFullYear()),
+  year: z.union([z.string(), z.number()]).transform((v) => typeof v === "string" ? parseInt(v) || new Date().getFullYear() : v),
   image_url: z.string().optional(),
   images: z.array(z.string()).default([]),
 })
