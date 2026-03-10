@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import { PageHeader } from "@/components/shared/page-header"
 import {
   Target,
@@ -118,6 +119,32 @@ export default function SobrePage() {
               competitivo, formar novos talentos e utilizar o bilhar como
               ferramenta de desenvolvimento social.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Photo Gallery */}
+      <section className="border-t border-border/30 py-12 lg:py-16">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              { src: "/images/sobre/sobre-1.jpg", alt: "Atletas ASSOPROBIL Tete em campeonato" },
+              { src: "/images/sobre/sobre-2.jpg", alt: "Equipa feminina ASSOPROBIL Tete" },
+              { src: "/images/sobre/sobre-3.jpg", alt: "Aniversário ASSOPROBIL Tete" },
+            ].map((photo) => (
+              <div
+                key={photo.src}
+                className="relative overflow-hidden rounded-xl border border-border/50 shadow-md aspect-[4/3]"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  className="object-cover transition-transform duration-500 hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
