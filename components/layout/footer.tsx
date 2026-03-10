@@ -4,12 +4,12 @@ import { Mail, MapPin, Phone } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 
 const quickLinks = [
-  { href: "/sobre", label: "Sobre a Associacao" },
+  { href: "/sobre", label: "Sobre a Associação" },
   { href: "/campeonatos", label: "Campeonatos" },
-  { href: "/noticias", label: "Noticias" },
+  { href: "/noticias", label: "Notícias" },
   { href: "/galeria", label: "Galeria" },
   { href: "/contactos", label: "Contactos" },
-  { href: "/login", label: "Area Administrativa" },
+  { href: "/login", label: "Área Administrativa" },
 ]
 
 const socialLinks = [
@@ -38,8 +38,8 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Associacao Provincial de Bilhar de Tete. Promovendo a excelencia
-              desportiva e o desenvolvimento comunitario atraves do bilhar desde
+              Associação Provincial de Bilhar de Tete. Promovendo a excelência
+              desportiva e o desenvolvimento comunitário através do bilhar desde
               2021.
             </p>
           </div>
@@ -47,7 +47,7 @@ export function Footer() {
           {/* Quick Links */}
           <div className="flex flex-col gap-4">
             <h3 className="font-serif text-sm font-semibold uppercase tracking-wider text-secondary">
-              Links Rapidos
+              Links Rápidos
             </h3>
             <nav className="flex flex-col gap-2" aria-label="Links rapidos">
               {quickLinks.map((link) => (
@@ -71,7 +71,7 @@ export function Footer() {
               <div className="flex items-start gap-2">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
                 <span className="text-sm text-muted-foreground">
-                  Cidade de Tete, Provincia de Tete, Mocambique
+                  Cidade de Tete, Província de Tete, Moçambique
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} ASSOPROBIL Tete. Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground">
-            Associacao Provincial de Bilhar de Tete, Mocambique
+            Associação Provincial de Bilhar de Tete, Moçambique
           </p>
         </div>
       </div>

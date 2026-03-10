@@ -13,7 +13,7 @@ export default function GaleriaPage() {
     <>
       <PageHeader
         title="Galeria"
-        description="Reviva os momentos marcantes dos nossos campeonatos, eventos comunitarios e sessoes de treino."
+        description="Reviva os momentos marcantes dos nossos campeonatos, eventos comunitários e sessões de treino."
         breadcrumbs={[{ label: "Galeria" }]}
       />
 

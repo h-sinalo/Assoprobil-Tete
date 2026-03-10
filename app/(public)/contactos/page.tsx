@@ -6,14 +6,14 @@ import { Mail, MapPin, Phone, Clock } from "lucide-react"
 export const metadata: Metadata = {
   title: "Contactos",
   description:
-    "Entre em contacto com a ASSOPROBIL Tete. Formulario de contacto, endereco, telefone e redes sociais.",
+    "Entre em contacto com a ASSOPROBIL Tete. Formulário de contacto, endereço, telefone e redes sociais.",
 }
 
 const contactInfo = [
   {
     icon: <MapPin className="size-5" />,
-    title: "Endereco",
-    lines: ["Cidade de Tete", "Provincia de Tete", "Mocambique"],
+    title: "Endereço",
+    lines: ["Cidade de Tete", "Província de Tete", "Moçambique"],
   },
   {
     icon: <Phone className="size-5" />,
@@ -27,8 +27,8 @@ const contactInfo = [
   },
   {
     icon: <Clock className="size-5" />,
-    title: "Horario",
-    lines: ["Segunda a Sexta: 08h00 - 17h00", "Sabado: 09h00 - 13h00"],
+    title: "Horário",
+    lines: ["Segunda a Sexta: 08h00 - 17h00", "Sábado: 09h00 - 13h00"],
   },
 ]
 
@@ -37,7 +37,7 @@ export default function ContactosPage() {
     <>
       <PageHeader
         title="Contactos"
-        description="Entre em contacto connosco. Estamos disponiveis para responder a todas as suas questoes sobre a ASSOPROBIL e os nossos programas."
+        description="Entre em contacto connosco. Estamos disponíveis para responder a todas as suas questões sobre a ASSOPROBIL e os nossos programas."
         breadcrumbs={[{ label: "Contactos" }]}
       />
 
@@ -55,7 +55,7 @@ export default function ContactosPage() {
             {/* Contact Info */}
             <div className="lg:col-span-2">
               <h2 className="mb-6 font-serif text-xl font-bold text-foreground">
-                Informacoes de Contacto
+                Informações de Contacto
               </h2>
               <div className="flex flex-col gap-6">
                 {contactInfo.map((info) => (
@@ -86,7 +86,7 @@ export default function ContactosPage() {
                   <div className="text-center">
                     <MapPin className="mx-auto size-8 text-primary/40" />
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Tete, Mocambique
+                      Tete, Moçambique
                     </p>
                     <p className="text-xs text-muted-foreground">
                       -16.1564, 33.5867

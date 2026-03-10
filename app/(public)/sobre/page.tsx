@@ -12,9 +12,9 @@ import {
 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Sobre a Associacao",
+  title: "Sobre a Associação",
   description:
-    "Conheca a ASSOPROBIL Tete - a nossa historia, missao, visao e valores. Desde 2021 a promover o bilhar na provincia de Tete, Mocambique.",
+    "Conheça a ASSOPROBIL Tete - a nossa história, missão, visão e valores. Desde 2021 a promover o bilhar na província de Tete, Moçambique.",
 }
 
 const timelineItems = [
@@ -48,45 +48,51 @@ const timelineItems = [
     description:
       "Criação oficial da Associação Provincial de Bilhar de Tete (ASSOPROBIL Tete), consolidando quatro anos de crescimento do bilhar na província e marcando o início de uma nova era para a modalidade em Tete.",
   },
+  {
+    year: "2026",
+    title: "Expansão Internacional",
+    description:
+      "Realização do primeiro campeonato internacional. A ASSOPROBIL passa a fazer parte da Associação Africana de Bilhar, consolidando a sua presença no panorama continental.",
+  },
 ]
 
 
 const values = [
   {
     icon: <Award className="size-6" />,
-    title: "Excelencia Desportiva",
+    title: "Excelência Desportiva",
     description:
-      "Compromisso com os mais altos padroes de competicao e formacao tecnica.",
+      "Compromisso com os mais altos padrões de competição e formação técnica.",
   },
   {
     icon: <Users className="size-6" />,
-    title: "Inclusao",
+    title: "Inclusão",
     description:
-      "O bilhar e para todos, independentemente da idade, genero ou condicao social.",
+      "O bilhar é para todos, independentemente da idade, género ou condição social.",
   },
   {
     icon: <Handshake className="size-6" />,
     title: "Fair Play",
     description:
-      "Respeito pelo adversario, pelas regras e pelo espirito desportivo.",
+      "Respeito pelo adversário, pelas regras e pelo espírito desportivo.",
   },
   {
     icon: <Heart className="size-6" />,
     title: "Responsabilidade Social",
     description:
-      "Utilizacao do desporto como ferramenta de transformacao comunitaria.",
+      "Utilização do desporto como ferramenta de transformação comunitária.",
   },
   {
     icon: <GraduationCap className="size-6" />,
-    title: "Formacao",
+    title: "Formação",
     description:
-      "Investimento continuo na capacitacao de jogadores, arbitros e dirigentes.",
+      "Investimento contínuo na capacitação de jogadores, árbitros e dirigentes.",
   },
   {
     icon: <Shield className="size-6" />,
     title: "Integridade",
     description:
-      "Transparencia e etica em todas as actividades da associacao.",
+      "Transparência e ética em todas as actividades da associação.",
   },
 ]
 
@@ -94,8 +100,8 @@ export default function SobrePage() {
   return (
     <>
       <PageHeader
-        title="Sobre a Associacao"
-        description="Conheca a historia, missao e valores da ASSOPROBIL Tete - a forca motriz do bilhar na provincia de Tete desde 2021."
+        title="Sobre a Associação"
+        description="Conheça a história, missão e valores da ASSOPROBIL Tete - a força motriz do bilhar na província de Tete desde 2021."
         breadcrumbs={[{ label: "Sobre" }]}
       />
 
@@ -105,10 +111,10 @@ export default function SobrePage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-base leading-relaxed text-muted-foreground lg:text-lg">
               A <span className="font-semibold text-foreground">ASSOPROBIL</span>{" "}
-              - Associacao Provincial de Bilhar de Tete - foi fundada em 2021 com
-              a missao de promover, organizar e desenvolver o desporto de bilhar
-              na provincia de Tete, Mocambique. Desde a sua fundacao, a
-              associacao tem trabalhado incansavelmente para elevar o nivel
+              - Associação Provincial de Bilhar de Tete - foi fundada em 2021 com
+              a missão de promover, organizar e desenvolver o desporto de bilhar
+              na província de Tete, Moçambique. Desde a sua fundação, a
+              associação tem trabalhado incansavelmente para elevar o nível
               competitivo, formar novos talentos e utilizar o bilhar como
               ferramenta de desenvolvimento social.
             </p>
@@ -125,12 +131,12 @@ export default function SobrePage() {
                 <Target className="size-6 text-primary" />
               </div>
               <h2 className="font-serif text-2xl font-bold text-foreground">
-                Missao
+                Missão
               </h2>
               <p className="leading-relaxed text-muted-foreground">
                 Promover, organizar e desenvolver o desporto de bilhar na
-                provincia de Tete, proporcionando competicoes de alto nivel,
-                formacao de qualidade e programas de inclusao social que
+                província de Tete, proporcionando competições de alto nível,
+                formação de qualidade e programas de inclusão social que
                 contribuam para o desenvolvimento integral dos praticantes e das
                 comunidades locais.
               </p>
@@ -140,13 +146,13 @@ export default function SobrePage() {
                 <Eye className="size-6 text-secondary" />
               </div>
               <h2 className="font-serif text-2xl font-bold text-foreground">
-                Visao
+                Visão
               </h2>
               <p className="leading-relaxed text-muted-foreground">
-                Ser a associacao provincial de referencia no desenvolvimento do
-                bilhar em Mocambique, reconhecida pela excelencia dos seus eventos,
-                pelo impacto positivo nas comunidades e pela formacao de atletas
-                de nivel nacional e internacional.
+                Ser a associação provincial de referência no desenvolvimento do
+                bilhar em Moçambique, reconhecida pela excelência dos seus eventos,
+                pelo impacto positivo nas comunidades e pela formação de atletas
+                de nível nacional e internacional.
               </p>
             </div>
           </div>
@@ -189,10 +195,10 @@ export default function SobrePage() {
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center">
             <h2 className="font-serif text-2xl font-bold text-foreground lg:text-3xl">
-              A Nossa Historia
+              A Nossa História
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
-              O percurso da ASSOPROBIL desde a sua fundacao
+              O percurso da ASSOPROBIL desde a sua fundação
             </p>
             <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-secondary" />
           </div>
@@ -217,8 +223,8 @@ export default function SobrePage() {
                   {/* Content */}
                   <div
                     className={`flex-1 rounded-lg border border-border/50 bg-card p-5 lg:w-[calc(50%-3rem)] ${i % 2 === 0
-                        ? "lg:ml-auto lg:pl-6"
-                        : "lg:mr-auto lg:pr-6"
+                      ? "lg:ml-auto lg:pl-6"
+                      : "lg:mr-auto lg:pr-6"
                       }`}
                   >
                     <h3 className="font-serif text-lg font-semibold text-foreground">

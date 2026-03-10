@@ -16,11 +16,11 @@ import {
 import { cn } from "@/lib/utils"
 
 const navLinks = [
-  { href: "/", label: "Inicio" },
+  { href: "/", label: "Início" },
   { href: "/sobre", label: "Sobre" },
   { href: "/campeonatos", label: "Campeonatos" },
   { href: "/responsabilidade-social", label: "Responsabilidade Social" },
-  { href: "/noticias", label: "Noticias" },
+  { href: "/noticias", label: "Notícias" },
   { href: "/galeria", label: "Galeria" },
   { href: "/contactos", label: "Contactos" },
   { href: "/login", label: "Entrar" },
