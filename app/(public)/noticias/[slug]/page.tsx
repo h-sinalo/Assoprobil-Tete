@@ -48,23 +48,17 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
 
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-3xl px-4 lg:px-8">
-          <Link
-            href="/noticias"
-            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="size-4" /> Voltar às Notícias
-          </Link>
-
-          <div className="flex flex-wrap gap-3 mb-8 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="size-4 text-primary" />
-              {article.date}
-            </span>
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Tag className="size-3" />
-              {article.category}
-            </Badge>
-          </div>
+          {article.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={article.image_url}
+                alt={article.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
 
 
 
@@ -78,16 +72,6 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
               ))}
           </div>
 
-          {article.image_url && (
-            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={article.image_url}
-                alt={article.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
 
           {article.images && article.images.length > 0 && (
             <div className="pt-12 border-t border-border/30">
@@ -107,6 +91,28 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
               </div>
             </div>
           )}
+
+          <div className="mt-16 pt-12 border-t border-border/30">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="size-4 text-primary" />
+                  {article.date}
+                </span>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Tag className="size-3" />
+                  {article.category}
+                </Badge>
+              </div>
+
+              <Link
+                href="/noticias"
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                <ArrowLeft className="size-4" /> Voltar às Notícias
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </>

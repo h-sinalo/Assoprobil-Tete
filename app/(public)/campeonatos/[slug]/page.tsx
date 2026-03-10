@@ -71,20 +71,17 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
 
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-4xl px-4 lg:px-8">
-          <Link
-            href="/campeonatos"
-            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="size-4" /> Voltar aos Campeonatos
-          </Link>
-
-          <div className="flex flex-wrap gap-2 mb-8">
-            <Badge className={statusConfig[status].className}>
-              {statusConfig[status].label}
-            </Badge>
-            <Badge variant="outline">{champ.year}</Badge>
-          </div>
-
+          {champ.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={champ.image_url}
+                alt={champ.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
 
           {/* Info Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
@@ -129,16 +126,6 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {champ.image_url && (
-            <div className="mt-12 relative aspect-video w-full overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={champ.image_url}
-                alt={champ.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
           {/* Additional Images */}
           {champ.images && champ.images.length > 0 && (
             <div className="mt-12">
@@ -160,6 +147,24 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
               </div>
             </div>
           )}
+
+          <div className="mt-16 pt-12 border-t border-border/30">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div className="flex flex-wrap gap-2">
+                <Badge className={statusConfig[status].className}>
+                  {statusConfig[status].label}
+                </Badge>
+                <Badge variant="outline">{champ.year}</Badge>
+              </div>
+
+              <Link
+                href="/campeonatos"
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                <ArrowLeft className="size-4" /> Voltar aos Campeonatos
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </>

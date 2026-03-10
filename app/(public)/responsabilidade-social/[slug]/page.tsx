@@ -48,23 +48,17 @@ export default async function SocialDetailPage({ params }: PageProps) {
 
       <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-3xl px-4 lg:px-8">
-          <Link
-            href="/responsabilidade-social"
-            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="size-4" /> Voltar à Responsabilidade Social
-          </Link>
-
-          <div className="flex flex-wrap gap-3 mb-8 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="size-4 text-primary" />
-              {post.date}
-            </span>
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Tag className="size-3" />
-              {post.category}
-            </Badge>
-          </div>
+          {post.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={post.image_url}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
 
 
           <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
@@ -77,16 +71,6 @@ export default async function SocialDetailPage({ params }: PageProps) {
               ))}
           </div>
 
-          {post.image_url && (
-            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={post.image_url}
-                alt={post.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
 
           {post.images && post.images.length > 0 && (
             <div className="mt-12 pt-12 border-t border-border/30">
@@ -108,6 +92,28 @@ export default async function SocialDetailPage({ params }: PageProps) {
               </div>
             </div>
           )}
+
+          <div className="mt-16 pt-12 border-t border-border/30">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="size-4 text-primary" />
+                  {post.date}
+                </span>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Tag className="size-3" />
+                  {post.category}
+                </Badge>
+              </div>
+
+              <Link
+                href="/responsabilidade-social"
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                <ArrowLeft className="size-4" /> Voltar à Responsabilidade Social
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </>
