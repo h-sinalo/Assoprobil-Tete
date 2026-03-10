@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Trash2, ImageIcon } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { GalleryItem } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -35,16 +38,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
-type FormData = {
-  title: string
-  description: string
-  category: "campeonatos" | "eventos" | "comunidade" | "treinos"
-  type: "photo" | "video"
-  image_url: string
-}
+const gallerySchema = z.object({
+  title: z.string().min(1, "O título é obrigatório"),
+  description: z.string().optional(),
+  category: z.enum(["campeonatos", "eventos", "comunidade", "treinos"]),
+  type: z.enum(["photo", "video"]),
+  image_url: z.string().min(1, "A imagem é obrigatória"),
+})
 
-const emptyForm: FormData = {
+type FormData = z.infer<typeof gallerySchema>
+
+const emptyValues: FormData = {
   title: "",
   description: "",
   category: "campeonatos",
@@ -65,24 +78,35 @@ export default function AdminGaleriaPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [activeFilter, setActiveFilter] = useState("all")
 
+  const form = useForm<FormData>({
+    resolver: zodResolver(gallerySchema),
+    defaultValues: emptyValues,
+  })
+
   const fetchItems = useCallback(async () => {
     setLoading(true)
-    const query = supabase.from("gallery").select("*").order("created_at", { ascending: false })
-    const { data } = await query
+    const { data } = await supabase
+      .from("gallery")
+      .select("*")
+      .order("created_at", { ascending: false })
     setItems(data ?? [])
     setLoading(false)
   }, [])
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
-  const handleSave = async () => {
+  const openCreate = () => {
+    form.reset(emptyValues)
+    setDialogOpen(true)
+  }
+
+  const onSubmit = async (data: FormData) => {
     setSaving(true)
     try {
-      const { error } = await supabase.from("gallery").insert(form)
+      const { error } = await supabase.from("gallery").insert(data)
       if (error) throw error
 
       toast.success("Item adicionado à galeria!")
@@ -100,6 +124,7 @@ export default function AdminGaleriaPage() {
     if (!deletingId) return
     await supabase.from("gallery").delete().eq("id", deletingId)
     setDeleteDialogOpen(false)
+    setDeletingId(null)
     fetchItems()
   }
 
@@ -112,12 +137,11 @@ export default function AdminGaleriaPage() {
           <h1 className="font-serif text-2xl font-bold text-foreground">Galeria</h1>
           <p className="mt-1 text-sm text-muted-foreground">Gerir fotos e vídeos da galeria</p>
         </div>
-        <Button onClick={() => { setForm(emptyForm); setDialogOpen(true) }} className="gap-2">
+        <Button onClick={openCreate} className="gap-2">
           <Plus className="size-4" /> Adicionar Item
         </Button>
       </div>
 
-      {/* Filter tabs */}
       <div className="flex flex-wrap gap-2">
         {[{ value: "all", label: "Todos" }, { value: "campeonatos", label: "Campeonatos" }, { value: "eventos", label: "Eventos" }, { value: "comunidade", label: "Comunidade" }, { value: "treinos", label: "Treinos" }].map((f) => (
           <button
@@ -179,54 +203,106 @@ export default function AdminGaleriaPage() {
               Adicionar Item à Galeria
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Título *</label>
-              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Descrição</label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Categoria *</label>
-                <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v as FormData["category"] }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="campeonatos">Campeonatos</SelectItem>
-                    <SelectItem value="eventos">Eventos</SelectItem>
-                    <SelectItem value="comunidade">Comunidade</SelectItem>
-                    <SelectItem value="treinos">Treinos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Tipo *</label>
-                <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v as FormData["type"] }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="photo">Foto</SelectItem>
-                    <SelectItem value="video">Vídeo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Ficheiro *</label>
-              <ImageUpload
-                value={form.image_url}
-                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
-                folder="gallery"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título *</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving || !form.title}>
-              {saving ? "A guardar…" : "Adicionar"}
-            </Button>
-          </DialogFooter>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria *</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="campeonatos">Campeonatos</SelectItem>
+                          <SelectItem value="eventos">Eventos</SelectItem>
+                          <SelectItem value="comunidade">Comunidade</SelectItem>
+                          <SelectItem value="treinos">Treinos</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo *</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="photo">Foto</SelectItem>
+                          <SelectItem value="video">Vídeo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="image_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ficheiro *</FormLabel>
+                    <FormControl>
+                      <ImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        folder="gallery"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "A guardar…" : "Adicionar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

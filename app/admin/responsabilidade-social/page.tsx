@@ -1,7 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Pencil, Trash2, Heart } from "lucide-react"
+import { Plus, Pencil, Trash2, HeartHandshake } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { SocialResponsibility } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -28,20 +31,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
-type FormData = {
-  title: string
-  slug: string
-  description: string
-  content: string
-  date: string
-  category: string
-  published: boolean
-  image_url: string
-  images: string[]
-}
+const socialSchema = z.object({
+  title: z.string().min(1, "O título é obrigatório"),
+  slug: z.string().min(1, "O slug é obrigatório"),
+  description: z.string().min(1, "A descrição curta é obrigatória"),
+  content: z.string().optional(),
+  date: z.string().min(1, "A data é obrigatória"),
+  category: z.string().min(1, "A categoria é obrigatória"),
+  published: z.boolean().default(true),
+  image_url: z.string().optional(),
+  images: z.array(z.string()).default([]),
+})
 
-const emptyForm: FormData = {
+type FormData = z.infer<typeof socialSchema>
+
+const emptyValues: FormData = {
   title: "",
   slug: "",
   description: "",
@@ -54,33 +67,58 @@ const emptyForm: FormData = {
 }
 
 export default function AdminResponsabilidadeSocialPage() {
-  const [posts, setPosts] = useState<SocialResponsibility[]>([])
+  const [items, setItems] = useState<SocialResponsibility[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<SocialResponsibility | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
   const [saving, setSaving] = useState(false)
 
-  const fetchPosts = useCallback(async () => {
+  const form = useForm<FormData>({
+    resolver: zodResolver(socialSchema),
+    defaultValues: emptyValues,
+  })
+
+  const fetchItems = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from("social_responsibility")
       .select("*")
       .order("created_at", { ascending: false })
-    setPosts(data ?? [])
+    setItems(data ?? [])
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchPosts() }, [fetchPosts])
+  useEffect(() => { fetchItems() }, [fetchItems])
 
-  const openCreate = () => { setEditingItem(null); setForm(emptyForm); setDialogOpen(true) }
+  const slugify = (s: string) =>
+    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "title" && !editingItem) {
+        form.setValue("slug", slugify(value.title || ""), { shouldValidate: true })
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, editingItem])
+
+  const openCreate = () => {
+    setEditingItem(null)
+    form.reset(emptyValues)
+    setDialogOpen(true)
+  }
+
   const openEdit = (item: SocialResponsibility) => {
     setEditingItem(item)
-    setForm({
-      title: item.title, slug: item.slug, description: item.description,
-      content: item.content ?? "", date: item.date, category: item.category,
+    form.reset({
+      title: item.title,
+      slug: item.slug,
+      description: item.description,
+      content: item.content ?? "",
+      date: item.date,
+      category: item.category,
       published: item.published,
       image_url: item.image_url ?? "",
       images: item.images ?? [],
@@ -88,18 +126,18 @@ export default function AdminResponsabilidadeSocialPage() {
     setDialogOpen(true)
   }
 
-  const handleSave = async () => {
+  const onSubmit = async (data: FormData) => {
     setSaving(true)
     try {
       const { error } = editingItem
-        ? await supabase.from("social_responsibility").update(form).eq("id", editingItem.id)
-        : await supabase.from("social_responsibility").insert(form)
+        ? await supabase.from("social_responsibility").update(data).eq("id", editingItem.id)
+        : await supabase.from("social_responsibility").insert(data)
 
       if (error) throw error
 
-      toast.success(editingItem ? "Iniciativa actualizada!" : "Iniciativa criada!")
+      toast.success(editingItem ? "Acção actualizada!" : "Acção criada!")
       setDialogOpen(false)
-      fetchPosts()
+      fetchItems()
     } catch (error: any) {
       console.error("Error saving social responsibility:", error)
       toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
@@ -112,21 +150,18 @@ export default function AdminResponsabilidadeSocialPage() {
     if (!deletingId) return
     await supabase.from("social_responsibility").delete().eq("id", deletingId)
     setDeleteDialogOpen(false)
-    fetchPosts()
+    fetchItems()
   }
-
-  const slugify = (s: string) =>
-    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-foreground">Responsabilidade Social</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Gerir iniciativas e projectos comunitários</p>
+          <p className="mt-1 text-sm text-muted-foreground">Gerir projectos e impacto na comunidade</p>
         </div>
         <Button onClick={openCreate} className="gap-2">
-          <Plus className="size-4" /> Nova Iniciativa
+          <Plus className="size-4" /> Nova Acção
         </Button>
       </div>
 
@@ -139,32 +174,38 @@ export default function AdminResponsabilidadeSocialPage() {
               <tr className="border-b border-border/50 bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">Título</th>
                 <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground sm:table-cell">Categoria</th>
+                <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground md:table-cell">Data</th>
                 <th className="px-4 py-3 text-left font-medium text-muted-foreground">Publicado</th>
                 <th className="px-4 py-3 text-right font-medium text-muted-foreground">Acções</th>
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
-                <tr key={post.id} className="border-b border-border/30 hover:bg-muted/20">
+              {items.map((item) => (
+                <tr key={item.id} className="border-b border-border/30 hover:bg-muted/20">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-foreground">{post.title}</p>
-                    <p className="line-clamp-1 text-xs text-muted-foreground">{post.date}</p>
+                    <p className="font-medium text-foreground">{item.title}</p>
+                    <p className="line-clamp-1 text-xs text-muted-foreground">{item.description}</p>
                   </td>
                   <td className="hidden px-4 py-3 sm:table-cell">
-                    <Badge variant="secondary">{post.category}</Badge>
+                    <Badge variant="secondary">{item.category}</Badge>
                   </td>
+                  <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{item.date}</td>
                   <td className="px-4 py-3">
-                    <Badge className={post.published ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}>
-                      {post.published ? "Sim" : "Não"}
+                    <Badge className={item.published ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}>
+                      {item.published ? "Sim" : "Não"}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(post)}>
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
                         <Pencil className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"
-                        onClick={() => { setDeletingId(post.id); setDeleteDialogOpen(true) }}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => { setDeletingId(item.id); setDeleteDialogOpen(true) }}
+                      >
                         <Trash2 className="size-4" />
                       </Button>
                     </div>
@@ -180,67 +221,154 @@ export default function AdminResponsabilidadeSocialPage() {
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-serif flex items-center gap-2">
-              <Heart className="size-5 text-primary" />
-              {editingItem ? "Editar Iniciativa" : "Nova Iniciativa"}
+              <HeartHandshake className="size-5 text-primary" />
+              {editingItem ? "Editar Acção" : "Nova Acção"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Título *</label>
-              <Input value={form.title} onChange={(e) => setForm((f) => ({
-                ...f, title: e.target.value, slug: editingItem ? f.slug : slugify(e.target.value),
-              }))} />
-            </div>
-            {/* <div className="grid gap-2">
-              <label className="text-sm font-medium">Slug (URL) *</label>
-              <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
-            </div> */}
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Descrição curta *</label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Conteúdo completo</label>
-              <Textarea value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} rows={5} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Imagem de Destaque</label>
-              <ImageUpload
-                value={form.image_url}
-                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
-                folder="social/thumbnails"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Título da acção social" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Galeria de Imagens</label>
-              <ImageUpload
-                value={form.images}
-                onChange={(urls) => setForm((f) => ({ ...f, images: urls as string[] }))}
-                multiple
-                folder="social/gallery"
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição curta *</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Breve resumo..." rows={2} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Conteúdo completo</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Conteúdo detalhado..." rows={6} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagem de Destaque</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          folder="social/thumbnails"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Galeria de Imagens</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          multiple
+                          folder="social/gallery"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Março de 2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Educação, Saúde..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="published"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Publicar acção</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Data *</label>
-                <Input value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
-              </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Categoria *</label>
-                <Input value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} placeholder="Formação, Solidariedade…" />
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={form.published} onCheckedChange={(v) => setForm((f) => ({ ...f, published: v }))} id="pub" />
-              <label htmlFor="pub" className="text-sm font-medium">Publicar iniciativa</label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving || !form.title || !form.slug}>
-              {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
-            </Button>
-          </DialogFooter>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

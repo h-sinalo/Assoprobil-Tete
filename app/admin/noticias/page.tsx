@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Newspaper } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { News } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -28,20 +31,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
-type FormData = {
-  title: string
-  slug: string
-  description: string
-  content: string
-  date: string
-  category: string
-  published: boolean
-  image_url?: string
-  images?: string[]
-}
+const newsSchema = z.object({
+  title: z.string().min(1, "O título é obrigatório"),
+  slug: z.string().min(1, "O slug é obrigatório"),
+  description: z.string().min(1, "A descrição curta é obrigatória"),
+  content: z.string().optional(),
+  date: z.string().min(1, "A data é obrigatória"),
+  category: z.string().min(1, "A categoria é obrigatória"),
+  published: z.boolean().default(true),
+  image_url: z.string().optional(),
+  images: z.array(z.string()).default([]),
+})
 
-const emptyForm: FormData = {
+type FormData = z.infer<typeof newsSchema>
+
+const emptyValues: FormData = {
   title: "",
   slug: "",
   description: "",
@@ -60,8 +73,12 @@ export default function AdminNoticiasPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<News | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
   const [saving, setSaving] = useState(false)
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(newsSchema),
+    defaultValues: emptyValues,
+  })
 
   const fetchNews = useCallback(async () => {
     setLoading(true)
@@ -75,15 +92,27 @@ export default function AdminNoticiasPage() {
 
   useEffect(() => { fetchNews() }, [fetchNews])
 
+  const slugify = (s: string) =>
+    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "title" && !editingItem) {
+        form.setValue("slug", slugify(value.title || ""), { shouldValidate: true })
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, editingItem])
+
   const openCreate = () => {
     setEditingItem(null)
-    setForm(emptyForm)
+    form.reset(emptyValues)
     setDialogOpen(true)
   }
 
   const openEdit = (item: News) => {
     setEditingItem(item)
-    setForm({
+    form.reset({
       title: item.title,
       slug: item.slug,
       description: item.description,
@@ -97,12 +126,12 @@ export default function AdminNoticiasPage() {
     setDialogOpen(true)
   }
 
-  const handleSave = async () => {
+  const onSubmit = async (data: FormData) => {
     setSaving(true)
     try {
       const { error } = editingItem
-        ? await supabase.from("news").update(form).eq("id", editingItem.id)
-        : await supabase.from("news").insert(form)
+        ? await supabase.from("news").update(data).eq("id", editingItem.id)
+        : await supabase.from("news").insert(data)
 
       if (error) throw error
 
@@ -123,9 +152,6 @@ export default function AdminNoticiasPage() {
     setDeleteDialogOpen(false)
     fetchNews()
   }
-
-  const slugify = (s: string) =>
-    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
 
   return (
     <div className="space-y-6">
@@ -199,71 +225,150 @@ export default function AdminNoticiasPage() {
               {editingItem ? "Editar Notícia" : "Nova Notícia"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Título *</label>
-              <Input
-                value={form.title}
-                onChange={(e) => setForm((f) => ({
-                  ...f, title: e.target.value,
-                  slug: editingItem ? f.slug : slugify(e.target.value),
-                }))}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Título da notícia" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            {/* <div className="grid gap-2">
-              <label className="text-sm font-medium">Slug (URL) *</label>
-              <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
-            </div> */}
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Descrição curta *</label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Conteúdo completo</label>
-              <Textarea value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} rows={6} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Imagem de Destaque</label>
-              <ImageUpload
-                value={form.image_url}
-                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
-                folder="news/thumbnails"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Galeria de Imagens</label>
-              <ImageUpload
-                value={form.images}
-                onChange={(urls) => setForm((f) => ({ ...f, images: urls as string[] }))}
-                multiple
-                folder="news/gallery"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Data *</label>
-                <Input value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} placeholder="10 de Janeiro, 2025" />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição curta *</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Breve resumo..." rows={2} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Categoria *</label>
-                <Input value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} placeholder="Institucional, Desporto…" />
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Conteúdo completo</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Conteúdo detalhado..." rows={6} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={form.published}
-                onCheckedChange={(v) => setForm((f) => ({ ...f, published: v }))}
-                id="published"
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagem de Destaque</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          folder="news/thumbnails"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Galeria de Imagens</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          multiple
+                          folder="news/gallery"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="10 de Janeiro, 2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Institucional, Desporto..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="published"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Publicar notícia</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
               />
-              <label htmlFor="published" className="text-sm font-medium">Publicar notícia</label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving || !form.title || !form.slug}>
-              {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
-            </Button>
-          </DialogFooter>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

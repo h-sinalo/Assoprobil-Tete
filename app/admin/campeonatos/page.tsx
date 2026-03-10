@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Trophy } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { Championship } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
@@ -34,23 +37,33 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
-type FormData = {
-  title: string
-  slug: string
-  description: string
-  long_description: string
-  date: string
-  end_date: string
-  location: string
-  participants: string
-  status: "upcoming" | "ongoing" | "completed"
-  year: string
-  image_url: string
-  images: string[]
-}
+const championshipSchema = z.object({
+  title: z.string().min(1, "O título é obrigatório"),
+  slug: z.string().min(1, "O slug é obrigatório"),
+  description: z.string().min(1, "A descrição curta é obrigatória"),
+  long_description: z.string().optional(),
+  date: z.string().min(1, "A data de início é obrigatória"),
+  end_date: z.string().optional(),
+  location: z.string().min(1, "O local é obrigatório"),
+  participants: z.string().transform((v) => parseInt(v) || 0),
+  status: z.enum(["upcoming", "ongoing", "completed"]),
+  year: z.string().transform((v) => parseInt(v) || new Date().getFullYear()),
+  image_url: z.string().optional(),
+  images: z.array(z.string()).default([]),
+})
 
-const emptyForm: FormData = {
+type FormData = z.input<typeof championshipSchema>
+
+const emptyValues: FormData = {
   title: "",
   slug: "",
   description: "",
@@ -80,8 +93,12 @@ export default function AdminCampeonatosPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Championship | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
   const [saving, setSaving] = useState(false)
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(championshipSchema),
+    defaultValues: emptyValues,
+  })
 
   const fetchChampionships = useCallback(async () => {
     setLoading(true)
@@ -95,15 +112,27 @@ export default function AdminCampeonatosPage() {
 
   useEffect(() => { fetchChampionships() }, [fetchChampionships])
 
+  const slugify = (s: string) =>
+    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "title" && !editingItem) {
+        form.setValue("slug", slugify(value.title || ""), { shouldValidate: true })
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, editingItem])
+
   const openCreate = () => {
     setEditingItem(null)
-    setForm(emptyForm)
+    form.reset(emptyValues)
     setDialogOpen(true)
   }
 
   const openEdit = (item: Championship) => {
     setEditingItem(item)
-    setForm({
+    form.reset({
       title: item.title,
       slug: item.slug,
       description: item.description,
@@ -120,14 +149,11 @@ export default function AdminCampeonatosPage() {
     setDialogOpen(true)
   }
 
-  const handleSave = async () => {
+  const onSubmit = async (values: FormData) => {
     setSaving(true)
     try {
-      const payload = {
-        ...form,
-        participants: parseInt(form.participants) || 0,
-        year: parseInt(form.year) || new Date().getFullYear(),
-      }
+      // transform values via schema
+      const payload = championshipSchema.parse(values)
 
       const { error } = editingItem
         ? await supabase.from("championships").update(payload).eq("id", editingItem.id)
@@ -154,17 +180,12 @@ export default function AdminCampeonatosPage() {
     fetchChampionships()
   }
 
-  const slugify = (s: string) =>
-    s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-foreground">Campeonatos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gerir todos os campeonatos e torneios
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Gerir todos os campeonatos e torneios</p>
         </div>
         <Button onClick={openCreate} className="gap-2">
           <Plus className="size-4" /> Novo Campeonato
@@ -221,7 +242,6 @@ export default function AdminCampeonatosPage() {
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
@@ -230,146 +250,209 @@ export default function AdminCampeonatosPage() {
               {editingItem ? "Editar Campeonato" : "Novo Campeonato"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Título *</label>
-              <Input
-                value={form.title}
-                onChange={(e) => setForm((f) => ({
-                  ...f,
-                  title: e.target.value,
-                  slug: editingItem ? f.slug : slugify(e.target.value),
-                }))}
-                placeholder="Ex: Campeonato Provincial 2025"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Campeonato Provincial 2025" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            {/* <div className="grid gap-2">
-              <label className="text-sm font-medium">Slug (URL) *</label>
-              <Input
-                value={form.slug}
-                onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                placeholder="campeonato-provincial-2025"
-              />
-            </div> */}
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Descrição curta *</label>
-              <Textarea
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                rows={2}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Descrição completa</label>
-              <Textarea
-                value={form.long_description}
-                onChange={(e) => setForm((f) => ({ ...f, long_description: e.target.value }))}
-                rows={4}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Data início *</label>
-                <Input
-                  value={form.date}
-                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  placeholder="15 de Março, 2025"
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição curta *</FormLabel>
+                      <FormControl>
+                        <Textarea rows={2} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Data fim</label>
-                <Input
-                  value={form.end_date}
-                  onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
-                  placeholder="30 de Março, 2025"
+                <FormField
+                  control={form.control}
+                  name="long_description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição completa</FormLabel>
+                      <FormControl>
+                        <Textarea rows={4} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Imagem de Capa</label>
-              <ImageUpload
-                value={form.image_url}
-                onChange={(url) => setForm((f) => ({ ...f, image_url: url as string }))}
-                folder="championships/covers"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Galeria de Imagens</label>
-              <ImageUpload
-                value={form.images}
-                onChange={(urls) => setForm((f) => ({ ...f, images: urls as string[] }))}
-                multiple
-                folder="championships/gallery"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Local *</label>
-              <Input
-                value={form.location}
-                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                placeholder="Clube Recreativo de Tete"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Participantes</label>
-                <Input
-                  type="number"
-                  value={form.participants}
-                  onChange={(e) => setForm((f) => ({ ...f, participants: e.target.value }))}
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data início *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="15 de Março, 2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data fim</FormLabel>
+                      <FormControl>
+                        <Input placeholder="30 de Março, 2025" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Ano</label>
-                <Input
-                  type="number"
-                  value={form.year}
-                  onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))}
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagem de Capa</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          folder="championships/covers"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
+
               <div className="grid gap-2">
-                <label className="text-sm font-medium">Estado *</label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm((f) => ({ ...f, status: v as FormData["status"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upcoming">Próximo</SelectItem>
-                    <SelectItem value="ongoing">Em Curso</SelectItem>
-                    <SelectItem value="completed">Concluído</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Galeria de Imagens</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          multiple
+                          folder="championships/gallery"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saving || !form.title || !form.slug}>
-              {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
-            </Button>
-          </DialogFooter>
+
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Clube Recreativo de Tete" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="participants"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Participantes</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ano</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado *</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="upcoming">Próximo</SelectItem>
+                          <SelectItem value="ongoing">Em Curso</SelectItem>
+                          <SelectItem value="completed">Concluído</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "A guardar…" : editingItem ? "Actualizar" : "Criar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar eliminação</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acção é irreversível. O campeonato será eliminado permanentemente.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Esta acção é irreversível.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
