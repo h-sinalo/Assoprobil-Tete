@@ -9,6 +9,7 @@ import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { Championship } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
+import { DatePicker } from "@/components/admin/date-picker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -313,10 +314,13 @@ export default function AdminCampeonatosPage() {
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data início *</FormLabel>
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Data de Início *</FormLabel>
                       <FormControl>
-                        <Input placeholder="15 de Março, 2025" {...field} />
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -326,10 +330,14 @@ export default function AdminCampeonatosPage() {
                   control={form.control}
                   name="end_date"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data fim</FormLabel>
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Data de Fim (Opcional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="30 de Março, 2025" {...field} />
+                        <DatePicker
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Escolha uma data"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

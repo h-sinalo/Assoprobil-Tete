@@ -8,6 +8,7 @@ import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { SocialResponsibility } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
+import { DatePicker } from "@/components/admin/date-picker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -75,6 +76,7 @@ const emptyValues: FormData = {
 
 export default function AdminResponsabilidadeSocialPage() {
   const [items, setItems] = useState<SocialResponsibility[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -87,6 +89,15 @@ export default function AdminResponsabilidadeSocialPage() {
     defaultValues: emptyValues,
   })
 
+  const fetchCategories = useCallback(async () => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("type", "social")
+      .order("name", { ascending: true })
+    setCategories(data ?? [])
+  }, [])
+
   const fetchItems = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -97,7 +108,10 @@ export default function AdminResponsabilidadeSocialPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchItems() }, [fetchItems])
+  useEffect(() => {
+    fetchItems()
+    fetchCategories()
+  }, [fetchItems, fetchCategories])
 
   const slugify = (s: string) =>
     s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-")
@@ -326,10 +340,13 @@ export default function AdminResponsabilidadeSocialPage() {
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Data *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Março de 2025" {...field} />
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -344,15 +361,15 @@ export default function AdminResponsabilidadeSocialPage() {
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccione uma categoria" />
+                            <SelectValue placeholder="Escolha uma categoria" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Educação">Educação</SelectItem>
-                          <SelectItem value="Saúde">Saúde</SelectItem>
-                          <SelectItem value="Infraestrutura">Infraestrutura</SelectItem>
-                          <SelectItem value="Apoio Social">Apoio Social</SelectItem>
-                          <SelectItem value="Outros">Outros</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.name} value={cat.name}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

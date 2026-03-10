@@ -9,6 +9,7 @@ import * as z from "zod"
 import { supabase } from "@/lib/supabase"
 import type { News } from "@/lib/supabase"
 import { ImageUpload } from "@/components/admin/image-upload"
+import { DatePicker } from "@/components/admin/date-picker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -76,6 +77,7 @@ const emptyValues: FormData = {
 
 export default function AdminNoticiasPage() {
   const [news, setNews] = useState<News[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -88,6 +90,15 @@ export default function AdminNoticiasPage() {
     defaultValues: emptyValues,
   })
 
+  const fetchCategories = useCallback(async () => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("type", "news")
+      .order("name", { ascending: true })
+    setCategories(data ?? [])
+  }, [])
+
   const fetchNews = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -97,6 +108,11 @@ export default function AdminNoticiasPage() {
     setNews(data ?? [])
     setLoading(false)
   }, [])
+
+  useEffect(() => {
+    fetchNews()
+    fetchCategories()
+  }, [fetchNews, fetchCategories])
 
   const searchParams = useSearchParams()
   const openParam = searchParams.get("open")
@@ -336,10 +352,13 @@ export default function AdminNoticiasPage() {
                   control={form.control}
                   name="date"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Data *</FormLabel>
                       <FormControl>
-                        <Input placeholder="10 de Janeiro, 2025" {...field} />
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -354,15 +373,15 @@ export default function AdminNoticiasPage() {
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccione uma categoria" />
+                            <SelectValue placeholder="Escolha uma categoria" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Institucional">Institucional</SelectItem>
-                          <SelectItem value="Desporto">Desporto</SelectItem>
-                          <SelectItem value="Sindicato">Sindicato</SelectItem>
-                          <SelectItem value="Comunidade">Comunidade</SelectItem>
-                          <SelectItem value="Outros">Outros</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.name} value={cat.name}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

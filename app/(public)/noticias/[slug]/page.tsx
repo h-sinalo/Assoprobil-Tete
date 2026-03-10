@@ -79,25 +79,7 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
           )}
 
 
-          {article.images && article.images.length > 0 && (
-            <div className="mb-12">
-              <h3 className="text-lg font-semibold mb-4 font-serif text-foreground">Galeria de Imagens</h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {article.images.map((img: string, idx: number) => (
-                  <div key={idx} className="relative aspect-video overflow-hidden rounded-lg border border-border/50 bg-muted">
-                    <Image
-                      src={img}
-                      alt={`${article.title} - ${idx + 1}`}
-                      fill
-                      className="object-cover transition-transform hover:scale-105"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground">
+          <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
             {(article.content || article.description)
               .split("\n")
               .map((paragraph: string, i: number) => (
@@ -106,6 +88,25 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
                 </p>
               ))}
           </div>
+
+          {article.images && article.images.length > 0 && (
+            <div className="pt-12 border-t border-border/30">
+              <h3 className="text-xl font-semibold mb-6 font-serif text-foreground">Galeria da Notícia</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {article.images.map((img: string, idx: number) => (
+                  <div key={idx} className="relative aspect-video overflow-hidden rounded-lg border border-border/50 bg-muted group">
+                    <Image
+                      src={img}
+                      alt={`${article.title} - ${idx + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </>

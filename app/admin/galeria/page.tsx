@@ -50,7 +50,7 @@ import {
 const gallerySchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   description: z.string().optional(),
-  category: z.enum(["campeonatos", "eventos", "comunidade", "treinos"]),
+  category: z.string().min(1, "A categoria é obrigatória"),
   type: z.enum(["photo", "video"]),
   image_url: z.string().min(1, "A imagem é obrigatória"),
 })
@@ -74,6 +74,7 @@ const categoryLabels: Record<string, string> = {
 
 export default function AdminGaleriaPage() {
   const [items, setItems] = useState<GalleryItem[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -86,6 +87,15 @@ export default function AdminGaleriaPage() {
     defaultValues: emptyValues,
   })
 
+  const fetchCategories = useCallback(async () => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("type", "gallery")
+      .order("name", { ascending: true })
+    setCategories(data ?? [])
+  }, [])
+
   const fetchItems = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -96,7 +106,10 @@ export default function AdminGaleriaPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { fetchItems() }, [fetchItems])
+  useEffect(() => {
+    fetchItems()
+    fetchCategories()
+  }, [fetchItems, fetchCategories])
 
   const openCreate = () => {
     form.reset(emptyValues)
@@ -240,15 +253,18 @@ export default function AdminGaleriaPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria *</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Escolha uma categoria" />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="campeonatos">Campeonatos</SelectItem>
-                          <SelectItem value="eventos">Eventos</SelectItem>
-                          <SelectItem value="comunidade">Comunidade</SelectItem>
-                          <SelectItem value="treinos">Treinos</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.name} value={cat.name}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
