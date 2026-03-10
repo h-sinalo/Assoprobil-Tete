@@ -66,17 +66,6 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
             </Badge>
           </div>
 
-          {article.image_url && (
-            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={article.image_url}
-                alt={article.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
 
 
           <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
@@ -88,6 +77,17 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
                 </p>
               ))}
           </div>
+
+          {article.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={article.image_url}
+                alt={article.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
 
           {article.images && article.images.length > 0 && (
             <div className="pt-12 border-t border-border/30">

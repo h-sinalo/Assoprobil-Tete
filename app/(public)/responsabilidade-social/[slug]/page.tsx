@@ -66,17 +66,6 @@ export default async function SocialDetailPage({ params }: PageProps) {
             </Badge>
           </div>
 
-          {post.image_url && (
-            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={post.image_url}
-                alt={post.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
 
           <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
             {(post.content || "")
@@ -87,6 +76,17 @@ export default async function SocialDetailPage({ params }: PageProps) {
                 </p>
               ))}
           </div>
+
+          {post.image_url && (
+            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={post.image_url}
+                alt={post.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
 
           {post.images && post.images.length > 0 && (
             <div className="mt-12 pt-12 border-t border-border/30">

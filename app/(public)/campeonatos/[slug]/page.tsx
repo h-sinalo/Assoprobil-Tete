@@ -85,17 +85,6 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
             <Badge variant="outline">{champ.year}</Badge>
           </div>
 
-          {champ.image_url && (
-            <div className="relative aspect-video w-full mb-12 overflow-hidden rounded-xl border border-border/50 shadow-xl">
-              <Image
-                src={champ.image_url}
-                alt={champ.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
 
           {/* Info Cards */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
@@ -137,46 +126,17 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
                 <CheckCircle className="size-5 text-primary" />
                 Resultados Finais
               </h2>
-              <div className="overflow-hidden rounded-lg border border-border/50">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/50 hover:bg-muted/50">
-                      <TableHead className="w-16 text-center">#</TableHead>
-                      <TableHead>Jogador</TableHead>
-                      <TableHead className="text-center">Pontos</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {champ.results.map(
-                      (r: { position: number; player: string; points: number }) => (
-                        <TableRow key={r.position} className="hover:bg-muted/30">
-                          <TableCell className="text-center">
-                            {r.position <= 3 ? (
-                              <Badge
-                                className={
-                                  r.position === 1
-                                    ? "bg-secondary text-secondary-foreground"
-                                    : r.position === 2
-                                      ? "bg-muted-foreground/40 text-foreground"
-                                      : "bg-secondary/40 text-secondary-foreground"
-                                }
-                              >
-                                {r.position}
-                              </Badge>
-                            ) : (
-                              <span className="text-muted-foreground">{r.position}</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">{r.player}</TableCell>
-                          <TableCell className="text-center font-semibold text-primary">
-                            {r.points}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+            </div>
+          )}
+
+          {champ.image_url && (
+            <div className="mt-12 relative aspect-video w-full overflow-hidden rounded-xl border border-border/50 shadow-xl">
+              <Image
+                src={champ.image_url}
+                alt={champ.title}
+                fill
+                className="object-cover"
+              />
             </div>
           )}
           {/* Additional Images */}
