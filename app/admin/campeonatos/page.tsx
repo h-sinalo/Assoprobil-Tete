@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Plus, Pencil, Trash2, Trophy } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -86,7 +86,7 @@ const statusConfig = {
 
 const statusLabels = { upcoming: "Próximo", ongoing: "Em Curso", completed: "Concluído" }
 
-export default function AdminCampeonatosPage() {
+function AdminCampeonatosPage() {
   const [championships, setChampionships] = useState<Championship[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -456,5 +456,13 @@ export default function AdminCampeonatosPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  )
+}
+
+export default function AdminCampeonatosPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">A carregar...</div>}>
+      <AdminCampeonatosPage />
+    </Suspense>
   )
 }

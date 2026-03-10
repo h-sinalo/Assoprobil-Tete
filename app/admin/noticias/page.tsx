@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
+
 import { useSearchParams } from "next/navigation"
 import { Plus, Pencil, Trash2, Newspaper } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -73,7 +74,7 @@ const emptyValues: FormData = {
   images: [],
 }
 
-export default function AdminNoticiasPage() {
+function AdminNoticiasPage() {
   const [news, setNews] = useState<News[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -412,5 +413,13 @@ export default function AdminNoticiasPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  )
+}
+
+export default function AdminNoticiasPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">A carregar...</div>}>
+      <AdminNoticiasPage />
+    </Suspense>
   )
 }
