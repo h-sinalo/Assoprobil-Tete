@@ -104,19 +104,19 @@ export default async function ContactosPage() {
                 ))}
               </div>
 
-              {/* Map Placeholder */}
-              <div className="mt-6 overflow-hidden rounded-lg border border-border/50">
-                <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-                  <div className="text-center">
-                    <MapPin className="mx-auto size-8 text-primary/40" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Tete, Moçambique
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      -16.1564, 33.5867
-                    </p>
-                  </div>
-                </div>
+              {/* Map */}
+              <div className="mt-6 overflow-hidden rounded-lg border border-border/50 shadow-md">
+                <iframe
+                  src="https://maps.google.com/maps?q=Avenida+Eduardo+Mondlane,+Tete,+Mo%C3%A7ambique&z=15&output=embed"
+                  width="100%"
+                  height="300"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Localização ASSOPROBIL Tete - Av. Eduardo Mondlane"
+                  className="w-full"
+                />
               </div>
 
               {/* Social Links */}
