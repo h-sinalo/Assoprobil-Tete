@@ -127,7 +127,9 @@ export default function AdminGaleriaPage() {
       fetchItems()
     } catch (error: any) {
       console.error("Error saving gallery item:", error)
-      toast.error("Erro ao guardar: " + (error.message || "Tente novamente"))
+      const errorMsg = error.message || error.details || "Tente novamente"
+      const errorHint = error.hint ? ` (${error.hint})` : ""
+      toast.error("Erro ao guardar: " + errorMsg + errorHint)
     } finally {
       setSaving(false)
     }
