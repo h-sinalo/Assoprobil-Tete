@@ -58,7 +58,7 @@ type FormData = z.infer<typeof gallerySchema>
 
 const emptyValues: FormData = {
   title: "",
-  category: "campeonatos",
+  category: "",
   type: "photo",
   image_url: "",
 }
@@ -239,7 +239,7 @@ export default function AdminGaleriaPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Escolha uma categoria" />
