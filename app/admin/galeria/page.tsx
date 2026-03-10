@@ -49,7 +49,6 @@ import {
 
 const gallerySchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
-  description: z.string().optional(),
   category: z.string().min(1, "A categoria é obrigatória"),
   type: z.enum(["photo", "video"]),
   image_url: z.string().min(1, "A imagem é obrigatória"),
@@ -59,7 +58,6 @@ type FormData = z.infer<typeof gallerySchema>
 
 const emptyValues: FormData = {
   title: "",
-  description: "",
   category: "campeonatos",
   type: "photo",
   image_url: "",
@@ -228,20 +226,6 @@ export default function AdminGaleriaPage() {
                     <FormLabel>Título *</FormLabel>
                     <FormControl>
                       <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição</FormLabel>
-                    <FormControl>
-                      <Textarea rows={2} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

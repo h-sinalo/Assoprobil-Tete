@@ -52,7 +52,6 @@ import {
 const newsSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   slug: z.string().min(1, "O slug é obrigatório"),
-  description: z.string().min(1, "A descrição curta é obrigatória"),
   content: z.string().optional(),
   date: z.string().min(1, "A data é obrigatória"),
   category: z.string().min(1, "A categoria é obrigatória"),
@@ -66,7 +65,6 @@ type FormData = z.infer<typeof newsSchema>
 const emptyValues: FormData = {
   title: "",
   slug: "",
-  description: "",
   content: "",
   date: "",
   category: "",
@@ -148,7 +146,6 @@ export default function AdminNoticiasPage() {
     form.reset({
       title: item.title,
       slug: item.slug,
-      description: item.description,
       content: item.content ?? "",
       date: item.date,
       category: item.category,
@@ -217,7 +214,6 @@ export default function AdminNoticiasPage() {
                 <tr key={article.id} className="border-b border-border/30 hover:bg-muted/20">
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground">{article.title}</p>
-                    <p className="line-clamp-1 text-xs text-muted-foreground">{article.description}</p>
                   </td>
                   <td className="hidden px-4 py-3 sm:table-cell">
                     <Badge variant="secondary">{article.category}</Badge>
@@ -273,22 +269,6 @@ export default function AdminNoticiasPage() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição curta *</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Breve resumo..." rows={2} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <div className="grid gap-2">
                 <FormField

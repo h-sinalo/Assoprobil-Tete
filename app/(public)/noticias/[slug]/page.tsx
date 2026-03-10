@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const { data } = await supabase
     .from("news")
-    .select("title, description")
+    .select("title, content")
     .eq("slug", slug)
     .single()
   if (!data) return { title: "Notícia | ASSOPROBIL Tete" }
-  return { title: data.title, description: data.description }
+  return { title: data.title, description: data.content?.substring(0, 160) }
 }
 
 export default async function NoticiaDetailPage({ params }: PageProps) {
@@ -39,7 +39,7 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
     <>
       <PageHeader
         title={article.title}
-        description={article.description}
+        description=""
         breadcrumbs={[
           { label: "Notícias", href: "/noticias" },
           { label: article.title },
@@ -80,7 +80,7 @@ export default async function NoticiaDetailPage({ params }: PageProps) {
 
 
           <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
-            {(article.content || article.description)
+            {(article.content || "")
               .split("\n")
               .map((paragraph: string, i: number) => (
                 <p key={i} className="mb-4">

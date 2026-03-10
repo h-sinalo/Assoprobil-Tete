@@ -33,11 +33,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const { data } = await supabase
     .from("championships")
-    .select("title, description")
+    .select("title, long_description")
     .eq("slug", slug)
     .single()
   if (!data) return { title: "Campeonato | ASSOPROBIL Tete" }
-  return { title: data.title, description: data.description }
+  return { title: data.title, description: data.long_description?.substring(0, 160) }
 }
 
 const statusConfig = {
@@ -126,7 +126,7 @@ export default async function CampeonatoDetailPage({ params }: PageProps) {
               Sobre o Campeonato
             </h2>
             <p className="leading-relaxed text-muted-foreground">
-              {champ.long_description || champ.description}
+              {champ.long_description || ""}
             </p>
           </div>
 

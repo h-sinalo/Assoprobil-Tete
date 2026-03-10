@@ -51,7 +51,6 @@ import {
 const championshipSchema = z.object({
   title: z.string().min(1, "O título é obrigatório"),
   slug: z.string().min(1, "O slug é obrigatório"),
-  description: z.string().min(1, "A descrição curta é obrigatória"),
   long_description: z.string().optional(),
   date: z.string().min(1, "A data de início é obrigatória"),
   end_date: z.string().optional(),
@@ -68,7 +67,6 @@ type FormData = z.input<typeof championshipSchema>
 const emptyValues: FormData = {
   title: "",
   slug: "",
-  description: "",
   long_description: "",
   date: "",
   end_date: "",
@@ -146,7 +144,6 @@ export default function AdminCampeonatosPage() {
     form.reset({
       title: item.title,
       slug: item.slug,
-      description: item.description,
       long_description: item.long_description ?? "",
       date: item.date,
       end_date: item.end_date ?? "",
@@ -276,22 +273,6 @@ export default function AdminCampeonatosPage() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição curta *</FormLabel>
-                      <FormControl>
-                        <Textarea rows={2} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <div className="grid gap-2">
                 <FormField

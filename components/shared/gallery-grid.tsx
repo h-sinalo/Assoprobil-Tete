@@ -106,13 +106,7 @@ export function GalleryGrid() {
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-background/90 via-transparent to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">
-                    {item.title}
                   </h3>
-                  {item.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
                 </div>
               </div>
             </button>
@@ -142,7 +136,6 @@ export function GalleryGrid() {
             </div>
             <div className="p-6">
               <DialogTitle className="font-serif text-xl">{selectedItem.title}</DialogTitle>
-              <DialogDescription className="mt-2 text-base">{selectedItem.description}</DialogDescription>
             </div>
           </DialogContent>
         )}

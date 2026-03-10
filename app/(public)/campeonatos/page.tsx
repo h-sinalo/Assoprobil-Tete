@@ -41,7 +41,7 @@ export default async function CampeonatosPage() {
               <PostCard
                 key={champ.slug}
                 title={champ.title}
-                description={champ.description}
+                description={champ.long_description ? champ.long_description.substring(0, 160) + "..." : ""}
                 date={champ.date}
                 image={champ.image_url}
                 href={`/campeonatos/${champ.slug}`}

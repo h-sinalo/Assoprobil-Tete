@@ -32,7 +32,7 @@ export default async function NoticiasPage() {
               <PostCard
                 key={article.slug}
                 title={article.title}
-                description={article.description}
+                description={article.content ? article.content.substring(0, 160) + "..." : ""}
                 date={article.date}
                 image={article.image_url}
                 href={`/noticias/${article.slug}`}

@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const { data } = await supabase
     .from("social_responsibility")
-    .select("title, description")
+    .select("title, content")
     .eq("slug", slug)
     .single()
   if (!data) return { title: "Responsabilidade Social | ASSOPROBIL Tete" }
-  return { title: data.title, description: data.description }
+  return { title: data.title, description: data.content?.substring(0, 160) }
 }
 
 export default async function SocialDetailPage({ params }: PageProps) {
@@ -39,7 +39,7 @@ export default async function SocialDetailPage({ params }: PageProps) {
     <>
       <PageHeader
         title={post.title}
-        description={post.description}
+        description=""
         breadcrumbs={[
           { label: "Responsabilidade Social", href: "/responsabilidade-social" },
           { label: post.title },
@@ -79,7 +79,7 @@ export default async function SocialDetailPage({ params }: PageProps) {
           )}
 
           <div className="prose prose-invert max-w-none leading-relaxed text-muted-foreground mb-12">
-            {(post.content || post.description)
+            {(post.content || "")
               .split("\n")
               .map((paragraph: string, i: number) => (
                 <p key={i} className="mb-4">

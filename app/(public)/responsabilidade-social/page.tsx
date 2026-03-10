@@ -32,7 +32,7 @@ export default async function ResponsabilidadeSocialPage() {
               <PostCard
                 key={post.slug}
                 title={post.title}
-                description={post.description}
+                description={post.content ? post.content.substring(0, 160) + "..." : ""}
                 date={post.date}
                 image={post.image_url}
                 href={`/responsabilidade-social/${post.slug}`}
