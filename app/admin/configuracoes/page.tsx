@@ -17,20 +17,67 @@ export default function AdminConfiguracoesPage() {
     const [newCatName, setNewCatName] = useState("")
     const [newCatType, setNewCatType] = useState("news")
     const [saving, setSaving] = useState(false)
+    const [savingSettings, setSavingSettings] = useState(false)
 
     // Geral fields
-    const [email, setEmail] = useState("info@assoprobil.co.mz")
-    const [phone, setPhone] = useState("+258 84 000 0000")
-    const [address, setAddress] = useState("Cidade de Tete, Província de Tete, Moçambique")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [address, setAddress] = useState("")
 
     // Social links
-    const [facebook, setFacebook] = useState("https://www.facebook.com/assoprobiltete")
+    const [facebook, setFacebook] = useState("")
     const [instagram, setInstagram] = useState("")
     const [youtube, setYoutube] = useState("")
 
     useEffect(() => {
         fetchCategories()
+        loadSettings()
     }, [])
+
+    async function loadSettings() {
+        const { data } = await supabase.from("site_settings").select("key, value")
+        if (data) {
+            const map = Object.fromEntries(data.map((r: any) => [r.key, r.value]))
+            setEmail(map.email ?? "")
+            setPhone(map.phone ?? "")
+            setAddress(map.address ?? "")
+            setFacebook(map.facebook ?? "")
+            setInstagram(map.instagram ?? "")
+            setYoutube(map.youtube ?? "")
+        }
+    }
+
+    async function saveGeneralSettings() {
+        setSavingSettings(true)
+        const entries = [
+            { key: "email", value: email },
+            { key: "phone", value: phone },
+            { key: "address", value: address },
+        ]
+        const { error } = await supabase.from("site_settings").upsert(entries, { onConflict: "key" })
+        setSavingSettings(false)
+        if (error) {
+            toast.error("Erro ao guardar: " + error.message)
+        } else {
+            toast.success("Informações guardadas com sucesso!")
+        }
+    }
+
+    async function saveSocialSettings() {
+        setSavingSettings(true)
+        const entries = [
+            { key: "facebook", value: facebook },
+            { key: "instagram", value: instagram },
+            { key: "youtube", value: youtube },
+        ]
+        const { error } = await supabase.from("site_settings").upsert(entries, { onConflict: "key" })
+        setSavingSettings(false)
+        if (error) {
+            toast.error("Erro ao guardar: " + error.message)
+        } else {
+            toast.success("Redes sociais guardadas com sucesso!")
+        }
+    }
 
     async function fetchCategories() {
         setLoading(true)
@@ -135,8 +182,8 @@ export default function AdminConfiguracoesPage() {
                                 <label className="text-sm font-medium">Morada</label>
                                 <Input value={address} onChange={e => setAddress(e.target.value)} />
                             </div>
-                            <Button className="w-fit" onClick={() => toast.success("Informações guardadas com sucesso!")}>
-                                Guardar Alterações
+                            <Button className="w-fit" onClick={saveGeneralSettings} disabled={savingSettings}>
+                                {savingSettings ? "A guardar…" : "Guardar Alterações"}
                             </Button>
                         </CardContent>
                     </Card>
@@ -162,8 +209,8 @@ export default function AdminConfiguracoesPage() {
                                 <label className="text-sm font-medium">YouTube</label>
                                 <Input value={youtube} onChange={e => setYoutube(e.target.value)} placeholder="https://www.youtube.com/assoprobiltete" />
                             </div>
-                            <Button className="w-fit" onClick={() => toast.success("Redes sociais guardadas com sucesso!")}>
-                                Guardar Redes Sociais
+                            <Button className="w-fit" onClick={saveSocialSettings} disabled={savingSettings}>
+                                {savingSettings ? "A guardar…" : "Guardar Redes Sociais"}
                             </Button>
                         </CardContent>
                     </Card>
