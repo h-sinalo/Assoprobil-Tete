@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Mail, MapPin, Phone } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { supabase } from "@/lib/supabase"
 
 const quickLinks = [
   { href: "/sobre", label: "Sobre a Associação" },
@@ -12,13 +13,28 @@ const quickLinks = [
   { href: "/login", label: "Área Administrativa" },
 ]
 
-const socialLinks = [
-  { href: "#", label: "Facebook" },
-  { href: "#", label: "Instagram" },
-  { href: "#", label: "YouTube" },
-]
+async function getSettings() {
+  const { data } = await supabase.from("site_settings").select("key, value")
+  if (!data) return {}
+  return Object.fromEntries(data.map((r: { key: string; value: string }) => [r.key, r.value]))
+}
 
-export function Footer() {
+export async function Footer() {
+  const settings = await getSettings()
+
+  const email = settings.email || "info@assoprobil.co.mz"
+  const phone = settings.phone || "+258 84 000 0000"
+  const address = settings.address || "Cidade de Tete, Província de Tete, Moçambique"
+  const facebook = settings.facebook || "#"
+  const instagram = settings.instagram || "#"
+  const youtube = settings.youtube || "#"
+
+  const socialLinks = [
+    { href: facebook, label: "Facebook", visible: !!settings.facebook },
+    { href: instagram, label: "Instagram", visible: !!settings.instagram },
+    { href: youtube, label: "YouTube", visible: !!settings.youtube },
+  ]
+
   return (
     <footer className="border-t border-primary/20 bg-card">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
@@ -70,22 +86,16 @@ export function Footer() {
             <div className="flex flex-col gap-3">
               <div className="flex items-start gap-2">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  Cidade de Tete, Província de Tete, Moçambique
-                </span>
+                <span className="text-sm text-muted-foreground">{address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="size-4 shrink-0 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  +258 84 000 0000
-                </span>
+                <span className="text-sm text-muted-foreground">{phone}</span>
               </div>
-              {/* <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Mail className="size-4 shrink-0 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  info@assoprobil.co.mz
-                </span>
-              </div> */}
+                <span className="text-sm text-muted-foreground">{email}</span>
+              </div>
             </div>
           </div>
 
