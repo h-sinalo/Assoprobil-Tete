@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Settings, Info, Lock, Globe, Mail, Plus, Trash2, Tag, Loader2 } from "lucide-react"
+import { Settings, Info, Lock, Globe, Mail, Plus, Trash2, Tag, Loader2, BarChart3 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,11 @@ export default function AdminConfiguracoesPage() {
     const [instagram, setInstagram] = useState("")
     const [youtube, setYoutube] = useState("")
 
+    // Homepage stats
+    const [statAnos, setStatAnos] = useState("")
+    const [statAtletas, setStatAtletas] = useState("")
+    const [statCampeonatos, setStatCampeonatos] = useState("")
+
     useEffect(() => {
         fetchCategories()
         loadSettings()
@@ -44,6 +49,9 @@ export default function AdminConfiguracoesPage() {
             setFacebook(map.facebook ?? "")
             setInstagram(map.instagram ?? "")
             setYoutube(map.youtube ?? "")
+            setStatAnos(map.stat_anos ?? "5+")
+            setStatAtletas(map.stat_atletas ?? "50+")
+            setStatCampeonatos(map.stat_campeonatos ?? "10+")
         }
     }
 
@@ -76,6 +84,22 @@ export default function AdminConfiguracoesPage() {
             toast.error("Erro ao guardar: " + error.message)
         } else {
             toast.success("Redes sociais guardadas com sucesso!")
+        }
+    }
+
+    async function saveStatsSettings() {
+        setSavingSettings(true)
+        const entries = [
+            { key: "stat_anos", value: statAnos },
+            { key: "stat_atletas", value: statAtletas },
+            { key: "stat_campeonatos", value: statCampeonatos },
+        ]
+        const { error } = await supabase.from("site_settings").upsert(entries, { onConflict: "key" })
+        setSavingSettings(false)
+        if (error) {
+            toast.error("Erro ao guardar: " + error.message)
+        } else {
+            toast.success("Estatísticas guardadas com sucesso!")
         }
     }
 
@@ -214,6 +238,50 @@ export default function AdminConfiguracoesPage() {
                             </Button>
                         </CardContent>
                     </Card>
+
+                    {/* Homepage Stats */}
+                    <Card className="bg-card">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                                <BarChart3 className="size-4 text-primary" />
+                                Estatísticas da Página Inicial
+                            </CardTitle>
+                            <CardDescription>
+                                Valores exibidos na secção de destaques do hero da homepage.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium">Anos de Actividade</label>
+                                    <Input
+                                        value={statAnos}
+                                        onChange={e => setStatAnos(e.target.value)}
+                                        placeholder="Ex: 5+"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium">Atletas Registados</label>
+                                    <Input
+                                        value={statAtletas}
+                                        onChange={e => setStatAtletas(e.target.value)}
+                                        placeholder="Ex: 50+"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <label className="text-sm font-medium">Campeonatos Realizados</label>
+                                    <Input
+                                        value={statCampeonatos}
+                                        onChange={e => setStatCampeonatos(e.target.value)}
+                                        placeholder="Ex: 10+"
+                                    />
+                                </div>
+                            </div>
+                            <Button className="w-fit" onClick={saveStatsSettings} disabled={savingSettings}>
+                                {savingSettings ? "A guardar…" : "Guardar Estatísticas"}
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="categorias" className="space-y-6 pt-6">
@@ -335,8 +403,8 @@ export default function AdminConfiguracoesPage() {
                                     <p className="text-sm font-medium text-foreground">Mensagens de Contacto</p>
                                 </div>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    As mensagens submetidas através do formulário de contacto são guardadas na
-                                    base de dados e podem ser consultadas na tabela &quot;contact_messages&quot; do Supabase.
+                                    As mensagens submetidas através do formulário de contacto são enviadas para
+                                    info@assoprobiltete.org e guardadas na tabela &quot;contact_messages&quot; do Supabase.
                                 </p>
                             </div>
                         </CardContent>

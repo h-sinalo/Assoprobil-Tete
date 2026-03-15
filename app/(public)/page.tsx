@@ -7,7 +7,7 @@ import { PostCard } from "@/components/shared/post-card"
 import { supabase } from "@/lib/supabase"
 
 async function getHomeData() {
-  const [champResult, newsResult, socialResult] = await Promise.all([
+  const [champResult, newsResult, socialResult, settingsResult] = await Promise.all([
     supabase
       .from("championships")
       .select("*")
@@ -26,11 +26,21 @@ async function getHomeData() {
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(2),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["stat_anos", "stat_atletas", "stat_campeonatos"]),
   ])
+  const settingsMap = Object.fromEntries(
+    (settingsResult.data ?? []).map((r: any) => [r.key, r.value])
+  )
   return {
     upcomingChampionships: champResult.data ?? [],
     latestNews: newsResult.data ?? [],
     socialHighlights: socialResult.data ?? [],
+    statAnos: settingsMap.stat_anos ?? "5+",
+    statAtletas: settingsMap.stat_atletas ?? "50+",
+    statCampeonatos: settingsMap.stat_campeonatos ?? "10+",
   }
 }
 
@@ -43,7 +53,7 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function HomePage() {
-  const { upcomingChampionships, latestNews, socialHighlights } = await getHomeData()
+  const { upcomingChampionships, latestNews, socialHighlights, statAnos, statAtletas, statCampeonatos } = await getHomeData()
 
   return (
     <>
@@ -88,9 +98,9 @@ export default async function HomePage() {
             </div>
             <div className="mt-12 flex flex-wrap gap-8">
               {[
-                { val: "5+", label: "Anos de Actividade" },
-                { val: "180+", label: "Atletas Registados" },
-                { val: "10+", label: "Campeonatos Realizados" },
+                { val: statAnos, label: "Anos de Actividade" },
+                { val: statAtletas, label: "Atletas Registados" },
+                { val: statCampeonatos, label: "Campeonatos Realizados" },
               ].map((s) => (
                 <div key={s.label} className="flex flex-col">
                   <span className="font-serif text-3xl font-bold text-secondary">{s.val}</span>

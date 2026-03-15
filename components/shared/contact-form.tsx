@@ -48,7 +48,7 @@ export function ContactForm() {
           Mensagem Enviada!
         </h3>
         <p className="text-muted-foreground">
-          Obrigado por entrar em contacto. Responderemos brevemente.
+          A sua mensagem foi enviada para info@assoprobiltete.org e responderemos brevemente.
         </p>
         <Button variant="outline" onClick={() => setStatus("idle")}>
           Enviar outra mensagem

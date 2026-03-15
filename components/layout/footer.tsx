@@ -22,7 +22,7 @@ async function getSettings() {
 export async function Footer() {
   const settings = await getSettings()
 
-  const email = settings.email || "info@assoprobil.co.mz"
+  const email = settings.email || "info@assoprobiltete.org"
   const phone = settings.phone || "+258 84 000 0000"
   const address = settings.address || "Cidade de Tete, Província de Tete, Moçambique"
   const facebook = settings.facebook || "#"
